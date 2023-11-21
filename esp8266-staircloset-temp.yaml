@@ -1,0 +1,50 @@
+esphome:
+  name: esp8266-staircloset-sensor
+
+esp8266:
+  board: nodemcuv2
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+api:
+  password: !secret api_password
+
+ota:
+  password: !secret ota_password
+
+wifi:
+  networks:
+  - ssid: !secret IOT_ssid
+    password: !secret IOT_password
+  - ssid: !secret IOT_alt_ssid
+    password: !secret IOT_alt_password
+
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+  ap:
+    ssid: "Esp8266-Staircloset-Temp"
+    password: !secret recovery_password
+
+mqtt:
+  broker: !secret mqtt_broker
+
+# I2C configuration entry
+i2c:
+  sda: D2
+  scl: D1
+  scan: true
+
+# BME280 configuration entry
+sensor:
+  - platform: bmp280
+    temperature:
+      name: "Stair Closet Temperature"
+      oversampling: 16x
+    pressure:
+      name: "Stair Closet Pressure"
+    address: 0x76
+    update_interval: 60s
+
+captive_portal:
+    

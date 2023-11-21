@@ -1,0 +1,45 @@
+# esp-fishtank
+esphome:
+  name: esp-fishtank
+
+esp8266:
+  board: nodemcuv2
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+api:
+  password: !secret api_password
+
+ota:
+  password: !secret ota_password
+
+wifi:
+  networks:
+  - ssid: !secret IOT_ssid
+    password: !secret IOT_password
+  - ssid: !secret IOT_alt_ssid
+    password: !secret IOT_alt_password
+    
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+  ap:
+    ssid: "Esp-Fishtank Fallback Hotspot"
+    password: !secret recovery_password
+
+mqtt:
+  broker: !secret mqtt_broker
+
+light:
+  - platform: monochromatic
+    output: fishtank_output
+    name: "Fish Tank Light"
+    default_transition_length: 30s
+    
+output:
+  - platform: esp8266_pwm
+    pin: D1
+    id: fishtank_output
+
+captive_portal:
+    

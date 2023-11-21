@@ -1,0 +1,208 @@
+esphome:
+  name: esp32-ac-zone-controller
+
+esp32:
+  board: esp32doit-devkit-v1          
+  framework:
+    type: arduino
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+api:
+  encryption:
+    key: "BswLFR0g2yGtALr50Oxp6Hkx16aVT391rxdlXXBeTYo="
+
+ota:
+  password: !secret ota_password
+
+wifi:
+  networks:
+  - ssid: !secret IOT_ssid
+    password: !secret IOT_password
+  - ssid: !secret IOT_alt_ssid
+    password: !secret IOT_alt_password
+
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+  ap:
+    ssid: "Esp32-Ac-Zone-Controller"
+    password: !secret recovery_password
+
+mqtt:
+  broker: !secret mqtt_broker
+
+sensor:
+  - platform: internal_temperature
+    name: "Internal Temperature"
+
+switch:
+  # D16 = Relay 1
+  - platform: gpio
+    pin: GPIO18
+    name: "Upstairs"
+    icon: "mdi:fan"
+    id: Relay1
+    on_turn_on:
+      then:
+        - switch.turn_on: Relay1
+        - switch.turn_on: outLED1
+    on_turn_off:
+      then:
+        - if:
+            condition:
+              and:
+              - switch.is_off: Relay2
+              - switch.is_off: Relay3
+            then:
+              - delay: 100ms
+              - switch.turn_on: Relay1
+              - switch.turn_on: outLED1
+            else:
+              - switch.turn_off: Relay1
+              - switch.turn_off: outLED1
+
+  # D17 = Relay 2
+  - platform: gpio
+    pin: GPIO17
+    name: "Downstair Bedroom"
+    icon: "mdi:fan"
+    id: Relay2
+    on_turn_on:
+      then:
+        - switch.turn_on: Relay2
+        - switch.turn_on: outLED2
+    on_turn_off:
+      then:
+        - if:
+            condition:
+              and:
+              - switch.is_off: Relay1
+              - switch.is_off: Relay3
+            then:
+              - delay: 100ms
+              - switch.turn_on: Relay2
+              - switch.turn_on: outLED2
+            else:
+              - switch.turn_off: Relay2
+              - switch.turn_off: outLED2
+    
+  # D18 = Relay 3
+  - platform: gpio
+    pin: GPIO16
+    name: "Downstairs Living"
+    icon: "mdi:fan"
+    id: Relay3
+    on_turn_on:
+      then:
+        - switch.turn_on: Relay3
+        - switch.turn_on: outLED3
+    on_turn_off:
+      then:
+        - if:
+            condition:
+              and:
+              - switch.is_off: Relay1
+              - switch.is_off: Relay2
+            then:
+              - delay: 100ms
+              - switch.turn_on: Relay3
+              - switch.turn_on: outLED3
+            else:
+              - switch.turn_off: Relay3
+              - switch.turn_off: outLED3
+
+  # D23 = LED1
+  - platform: gpio
+    pin: 
+      number: GPIO26
+      mode: output
+    id: outLED1
+
+  # D25 = LED2
+  - platform: gpio
+    pin: 
+      number: GPIO25
+      mode: output
+    id: outLED2
+
+  # D26 = LED3
+  - platform: gpio
+    pin: 
+      number: GPIO23
+      mode: output
+    id: outLED3
+
+binary_sensor:
+  # D27 = PB1
+  - platform: gpio
+    pin: 
+      number: GPIO33
+      inverted: true
+      mode:
+        input: true
+        pullup: true
+    name: "PB1"
+    filters:
+      - delayed_on: 50ms
+    on_press:
+      then:
+        - if:
+            condition:
+              and:
+              - switch.is_off: Relay2
+              - switch.is_off: Relay3
+            then:
+              - switch.turn_on: "Relay1"
+            else:
+              - switch.toggle: "Relay1"
+
+  # D32 = PB2
+  - platform: gpio
+    pin: 
+      number: GPIO32
+      inverted: true
+      mode:
+        input: true
+        pullup: true
+    name: "PB2"
+    filters:
+      - delayed_on: 50ms
+    on_press:
+      then:
+        - if:
+            condition:
+              and:
+              - switch.is_off: Relay1
+              - switch.is_off: Relay3
+            then:
+              - switch.turn_on: "Relay2"
+            else:
+              - switch.toggle: "Relay2"
+
+  # D33 = PB3
+  - platform: gpio
+    pin: 
+      number: GPIO27
+      inverted: true
+      mode:
+        input: true
+        pullup: true
+    name: "PB3"
+    filters:
+      - delayed_on: 50ms
+    on_press:
+      then:
+        - if:
+            condition:
+              and:
+              - switch.is_off: Relay1
+              - switch.is_off: Relay2
+            then:
+              - switch.turn_on: "Relay3"
+            else:
+              - switch.toggle: "Relay3"
+
+
+captive_portal:
+    

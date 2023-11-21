@@ -1,0 +1,36 @@
+esphome:
+  name: esp32-loungeroomlights
+
+esp32:
+  board: nodemcu-32s
+  framework:
+    type: arduino
+
+# Enable logging
+logger:
+
+# Enable Home Assistant API
+api:
+  password: !secret api_password
+
+ota:
+  password: !secret ota_password
+
+wifi:
+  networks:
+  - ssid: !secret IOT_ssid
+    password: !secret IOT_password
+  - ssid: !secret IOT_alt_ssid
+    password: !secret IOT_alt_password
+    
+  # Enable fallback hotspot (captive portal) in case wifi connection fails
+  ap:
+    ssid: "Esp-Fishtank Fallback Hotspot"
+    password: !secret recovery_password
+
+mqtt:
+  broker: !secret mqtt_broker
+
+
+captive_portal:
+    
